@@ -14,7 +14,7 @@ El código está en `apps/api/src/ai/` y nada fuera de esa carpeta conoce al pro
 | `AI_MODEL` | Modelo de chat para el agente |
 | `AI_STT_MODEL` | Modelo de transcripción de audio (vacío = sin transcripción; queda "Me llamaron" escrito o dictado en el navegador) |
 | `AI_TIMEOUT_MS` | Presupuesto total del agente (por defecto 12 000 ms) |
-| `AI_MAX_TOOL_CALLS` | Máximo de consultas a fuentes que el agente puede pedir (por defecto 3) |
+| `AI_MAX_TOOL_CALLS` | Máximo de consultas adicionales a fuentes que el agente puede pedir (por defecto 1; cada una añade una llamada al modelo y consume cuota) |
 
 ## Perfiles
 
@@ -23,11 +23,13 @@ El código está en `apps/api/src/ai/` y nada fuera de esa carpeta conoce al pro
 ```env
 AI_PROVIDER=groq
 AI_API_KEY=gsk_...
-AI_MODEL=llama-3.3-70b-versatile
+AI_MODEL=qwen/qwen3.8-27b
 AI_STT_MODEL=whisper-large-v3
 ```
 
 - Clave gratis en https://console.groq.com (sin tarjeta). Límites en `console.groq.com/settings/limits`.
+- Límite gratuito verificado (2026-10-20): 1.000 solicitudes/día y 8.000 tokens/min por organización → ~4–6 análisis con IA por minuto en total. Lo que exceda se resuelve con reglas y la app lo indica.
+- `llama-3.3-70b-versatile` fue retirado; alternativas probadas: `openai/gpt-oss-120b` (más falsos positivos), `openai/gpt-oss-20b`.
 - Datos: según https://console.groq.com/docs/your-data, por defecto no conserva entradas ni salidas de inferencia (solo metadatos de uso). El compromiso de no entrenar con los datos está en su DPA: **confirmarlo antes de salir a público**.
 
 ### Google Gemini

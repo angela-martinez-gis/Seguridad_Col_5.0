@@ -33,7 +33,8 @@ export class OpenAiCompatibleProvider implements AiProvider {
         model: this.model,
         messages: req.messages,
         temperature: 0.1,
-        max_tokens: 900,
+        // Las respuestas reales rondan 300 tokens; reservar de más consume el límite por minuto del plan gratuito.
+        max_tokens: 500,
         ...(usarTools ? { tools: req.tools, tool_choice: "auto" as const } : {}),
         ...(req.json ? { response_format: { type: "json_object" as const } } : {}),
       },

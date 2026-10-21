@@ -24,7 +24,7 @@ interface AiProvider {
 | `AI_PROVIDER` | `groq` | `gemini` |
 | `AI_BASE_URL` | `https://api.groq.com/openai/v1` | `https://generativelanguage.googleapis.com/v1beta/openai/` |
 | `AI_API_KEY` | secreto | secreto |
-| `AI_MODEL` | `llama-3.3-70b-versatile` | `gemini-2.5-flash` |
+| `AI_MODEL` | `qwen/qwen3.8-27b` | `gemini-2.5-flash` |
 | `AI_STT_MODEL` | `whisper-large-v3` | *(vacío → transcripción no disponible)* |
 
 Los nombres de modelo se confirman al implementar en la consola del proveedor; cambiar de proveedor no requiere cambios de código (SC-005).
@@ -38,7 +38,7 @@ Los nombres de modelo se confirman al implementar en la consola del proveedor; c
 | `verificar_canal_entidad` | `{ valor }` | resultado de `/entidades/verificar` |
 | `consultar_reportes_comunidad` | `{ indicador, tipo }` | `SourceCheck` |
 
-Máx. `AI_MAX_TOOL_CALLS` (3) llamadas adicionales; presupuesto total `AI_TIMEOUT_MS` (12 s).
+Máx. `AI_MAX_TOOL_CALLS` (1, ajustado tras medir el consumo real de tokens en el plan gratuito) llamadas adicionales; presupuesto total `AI_TIMEOUT_MS` (12 s).
 
 ## Prompt de sistema (resumen normativo)
 

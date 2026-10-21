@@ -19,6 +19,8 @@ const ESPECIFICIDAD_MIN = 0.8;
 const args = new Map(process.argv.slice(2).map((a) => a.replace(/^--/, "").split("=") as [string, string]));
 const modo = args.get("mode") ?? "rules";
 const apiUrl = process.env.EVAL_API_URL ?? "http://localhost:8787";
+// Pausa entre análisis en modo agente, para respetar los límites por minuto de planes gratuitos (ms).
+const pausaMs = Number(process.env.EVAL_PAUSA_MS ?? 0);
 
 const ruta = fileURLToPath(new URL("./fixtures/golden.json", import.meta.url));
 const casos: CasoDorado[] = JSON.parse(readFileSync(ruta, "utf8")).casos;
@@ -60,6 +62,7 @@ async function main() {
       if (v.ia.estado === "usada") iaUsada.si++;
       else iaUsada.no++;
     }
+    if (modo === "agent" && pausaMs) await new Promise((r) => setTimeout(r, pausaMs));
     const predFraude = v.nivel !== "bajo";
     const ok = (c.esperado === "fraude") === predFraude;
     if (c.esperado === "fraude") {
