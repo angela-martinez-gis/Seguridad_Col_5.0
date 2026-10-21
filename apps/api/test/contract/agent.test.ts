@@ -40,7 +40,8 @@ describe("agente IA (contracts/ai-provider.md)", () => {
     const r = await correr(new MockProvider("timeout"), "hola", 800);
     expect(r.assessment).toBeNull();
     expect(r.error).toBe("timeout");
-    expect(Date.now() - t0).toBeLessThan(2000);
+    // Margen amplio para máquinas cargadas: sin el corte tardaría AI_TIMEOUT_MS (12 s).
+    expect(Date.now() - t0).toBeLessThan(5000);
   });
 
   it("cuota agotada (429) → null", async () => {

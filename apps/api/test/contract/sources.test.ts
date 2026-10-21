@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
-import { consultarRdap } from "../../src/sources/rdap";
+import { consultarRdap, reiniciarBootstrapRdap } from "../../src/sources/rdap";
 import { runSource } from "../../src/sources/runSource";
 import { consultarSafeBrowsing, expresionesUrl } from "../../src/sources/safeBrowsing";
 import { consultarUrlhaus } from "../../src/sources/urlhaus";
@@ -47,6 +47,22 @@ describe("URLhaus", () => {
 });
 
 describe("RDAP", () => {
+  it("consulta el registro autoritativo del TLD según IANA, con User-Agent", async () => {
+    reiniciarBootstrapRdap();
+    const pedidos: { url: string; ua: string | null }[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (u: string, init?: RequestInit) => {
+        pedidos.push({ url: String(u), ua: new Headers(init?.headers).get("user-agent") });
+        if (String(u).includes("data.iana.org")) return json({ services: [[["xyz"], ["https://rdap.centralnic.com/xyz/"]]] });
+        return json({ events: [{ eventAction: "registration", eventDate: "2001-01-01T00:00:00Z" }] });
+      }),
+    );
+    await consultarRdap("ejemplo.xyz", señal());
+    expect(pedidos[1].url).toBe("https://rdap.centralnic.com/xyz/domain/ejemplo.xyz");
+    expect(pedidos[1].ua).toContain("IdentificaTuFraude");
+  });
+
   it("dominio de 6 días → señal", async () => {
     const ahora = Date.parse("2026-10-20T00:00:00Z");
     vi.stubGlobal("fetch", vi.fn(async () => json({ events: [{ eventAction: "registration", eventDate: "2026-10-14T00:00:00Z" }] })));
