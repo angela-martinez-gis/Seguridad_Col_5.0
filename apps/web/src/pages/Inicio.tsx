@@ -38,7 +38,6 @@ export default function Inicio() {
       <ul className="tarjeta lista ayuda">
         <li>Sin conexión, el análisis se hace con reglas en tu dispositivo.</li>
         <li>Con tu permiso en cada análisis, el contenido (con tus datos personales ocultos) se revisa con IA y fuentes abiertas.</li>
-        <li>Es una versión de prueba: no reemplaza a tu entidad financiera ni a las autoridades.</li>
         <li>Ante la duda, comunícate con la entidad por su canal oficial, no con los datos del mensaje.</li>
       </ul>
     </>
