@@ -71,8 +71,9 @@ como señal de riesgo.
 EL MODELO DE IA: GRATUITO HOY, INTERCAMBIABLE MAÑANA
 ---------------------------------------------------------------------
 Modelo en uso:
-  - Llama 3.3 70B (llama-3.3-70b-versatile), un modelo abierto de Meta,
+  - Qwen 3.8 27B (qwen/qwen3.8-27b), un modelo abierto de Alibaba Cloud,
     ejecutado en el plan gratuito de Groq, para el razonamiento del agente.
+    Responde en 1 a 4 segundos por análisis.
   - Whisper large-v3, también en el plan gratuito de Groq, para convertir
     notas de voz en texto.
 
@@ -86,7 +87,9 @@ La arquitectura no depende de un solo proveedor. Cambiar a Google Gemini,
 OpenAI, OpenRouter o a un modelo propio instalado en servidores del
 proyecto se hace solo cambiando la configuración, sin tocar una línea de
 la aplicación. Si mañana aparece un modelo mejor o más barato, el proyecto
-lo adopta en minutos.
+lo adopta en minutos. De hecho ya ocurrió: el modelo previsto inicialmente
+(Llama 3.3 70B) fue retirado por el proveedor, y el reemplazo se evaluó y
+se adoptó cambiando una sola variable.
 
 
 PENSADO PARA COMUNIDADES DE BAJOS RECURSOS

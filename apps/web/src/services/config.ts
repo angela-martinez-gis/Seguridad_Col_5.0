@@ -13,7 +13,7 @@ export interface ConfigPublica {
    Revisado 2026-10-20; confirmar contra los términos vigentes antes de salir a público. */
 export const PROVEEDORES_IA: Record<string, { nombre: string; datos: string; fuente?: string }> = {
   groq: {
-    nombre: "Groq (modelos Llama y Whisper)",
+    nombre: "Groq (modelos abiertos Qwen y Whisper)",
     datos:
       "Según la documentación de Groq, por defecto no conserva los textos ni audios de las solicitudes de inferencia; solo metadatos de uso. El compromiso de no entrenar con estos datos figura en su acuerdo de tratamiento de datos (pendiente de confirmación formal).",
     fuente: "https://console.groq.com/docs/your-data",

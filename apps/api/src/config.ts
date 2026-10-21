@@ -27,10 +27,10 @@ const EnvSchema = z
     AI_PROVIDER: z.enum(PROVEEDORES).default("mock"),
     AI_BASE_URL: vacioComoUndefined,
     AI_API_KEY: vacioComoUndefined,
-    AI_MODEL: z.string().default("llama-3.3-70b-versatile"),
+    AI_MODEL: z.string().default("qwen/qwen3.8-27b"),
     AI_STT_MODEL: vacioComoUndefined,
     AI_TIMEOUT_MS: z.coerce.number().int().min(1000).default(12000),
-    AI_MAX_TOOL_CALLS: z.coerce.number().int().min(0).max(6).default(3),
+    AI_MAX_TOOL_CALLS: z.coerce.number().int().min(0).max(6).default(1),
     MOCK_FAIL: z.enum(["none", "timeout", "invalid", "429"]).default("none"),
 
     RATE_LIMIT_ANALISIS: z.coerce.number().int().min(1).default(20),

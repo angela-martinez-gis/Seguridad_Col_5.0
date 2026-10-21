@@ -108,7 +108,7 @@ Para el panel público (FR-028): conteos por `modalidad`, por `entidad` (de `ver
 
 ## 9. Configuración del modelo IA *(variables de entorno, no BD)*
 
-`AI_PROVIDER` (`groq | gemini | openrouter | openai | ollama | mock | none`), `AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL`, `AI_STT_MODEL`, `AI_TIMEOUT_MS` (12.000), `AI_MAX_TOOL_CALLS` (3). Expuesto públicamente solo `{ proveedor, modelo }` en `GET /api/config` para el aviso de privacidad.
+`AI_PROVIDER` (`groq | gemini | openrouter | openai | ollama | mock | none`), `AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL`, `AI_STT_MODEL`, `AI_TIMEOUT_MS` (12.000), `AI_MAX_TOOL_CALLS` (1). Expuesto públicamente solo `{ proveedor, modelo }` en `GET /api/config` para el aviso de privacidad.
 
 ## Transiciones de estado (flujo de un análisis)
 

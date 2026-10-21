@@ -20,7 +20,7 @@ jobs:
     env:
       NODE_ENV: test
       AI_PROVIDER: ${{ vars.EVAL_AI_PROVIDER || 'groq' }}
-      AI_MODEL: ${{ vars.EVAL_AI_MODEL || 'llama-3.3-70b-versatile' }}
+      AI_MODEL: ${{ vars.EVAL_AI_MODEL || 'qwen/qwen3.8-27b' }}
       AI_API_KEY: ${{ secrets.EVAL_AI_API_KEY }}
       DB_PATH: ":memory:"
       PORT: "8787"
@@ -43,6 +43,8 @@ jobs:
           cat api.log; exit 1
       - name: Conjunto dorado con el agente
         run: npm run eval -- --mode=agent
+        env:
+          EVAL_PAUSA_MS: ${{ vars.EVAL_PAUSA_MS || 12000 }}
       - name: Latencia p95 (SC-001)
         run: npm run smoke:ai -w @itf/api
         env:
