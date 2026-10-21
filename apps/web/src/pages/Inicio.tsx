@@ -10,18 +10,6 @@ export default function Inicio() {
           denunciar.
         </p>
       </section>
-      <div className="pasos">
-        <div className="paso">
-          <strong>1. Pega, sube o cuenta.</strong> Un mensaje, un enlace, una captura de pantalla, una nota de voz o lo que te dijeron por teléfono.
-        </div>
-        <div className="paso">
-          <strong>2. Revisa el resultado.</strong> Un nivel de riesgo (bajo, medio o alto) con los motivos, contrastados con fuentes abiertas.
-        </div>
-        <div className="paso">
-          <strong>3. Actúa con seguridad.</strong> Sigue los pasos, guarda un registro verificable y, si hace falta, denuncia ante la Policía o la
-          Fiscalía.
-        </div>
-      </div>
       <Link className="btn" to="/analizar">
         Empezar
       </Link>
