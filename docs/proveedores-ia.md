@@ -11,7 +11,8 @@ El código está en `apps/api/src/ai/` y nada fuera de esa carpeta conoce al pro
 | `AI_PROVIDER` | `groq` · `gemini` · `openrouter` · `openai` · `ollama` · `none` (solo reglas) · `mock` (pruebas; prohibido en producción) |
 | `AI_BASE_URL` | Opcional: si se omite se usa la URL conocida del proveedor |
 | `AI_API_KEY` | Clave del proveedor (secreto; nunca en el código) |
-| `AI_MODEL` | Modelo de chat para el agente |
+| `AI_MODEL` | Modelo de chat principal del agente |
+| `AI_MODELOS_RESPALDO` | Modelos de respaldo separados por coma, usados cuando el anterior agota su cuota |
 | `AI_STT_MODEL` | Modelo de transcripción de audio (vacío = sin transcripción; queda "Me llamaron" escrito o dictado en el navegador) |
 | `AI_TIMEOUT_MS` | Presupuesto total del agente (por defecto 12 000 ms) |
 | `AI_MAX_TOOL_CALLS` | Máximo de consultas adicionales a fuentes que el agente puede pedir (por defecto 1; cada una añade una llamada al modelo y consume cuota) |
@@ -23,13 +24,16 @@ El código está en `apps/api/src/ai/` y nada fuera de esa carpeta conoce al pro
 ```env
 AI_PROVIDER=groq
 AI_API_KEY=gsk_...
-AI_MODEL=qwen/qwen3.8-27b
+AI_MODEL=openai/gpt-oss-120b
+AI_MODELOS_RESPALDO=qwen/qwen3.8-27b
 AI_STT_MODEL=whisper-large-v3
 ```
 
 - Clave gratis en https://console.groq.com (sin tarjeta). Límites en `console.groq.com/settings/limits`.
-- Límite gratuito verificado (2026-10-20): 1.000 solicitudes/día y 8.000 tokens/min por organización → ~4–6 análisis con IA por minuto en total. Lo que exceda se resuelve con reglas y la app lo indica.
-- `llama-3.3-70b-versatile` fue retirado; alternativas probadas: `openai/gpt-oss-120b` (más falsos positivos), `openai/gpt-oss-20b`.
+- Límites gratuitos verificados (2026-10-20), **por modelo**: 1.000 solicitudes/día, 8.000 tokens/min y **200.000 tokens/día**. Un análisis usa ~950 tokens con `gpt-oss-120b` y ~1.500 con `qwen3.8-27b` → unos **200 + 130 análisis con IA al día** con la cadena de respaldo. Lo que exceda se resuelve con reglas y la app lo indica.
+- `AI_MODELOS_RESPALDO`: si un modelo responde 429 (cuota), se usa el siguiente y el agotado queda en pausa el tiempo que indique Groq. El caso registra qué modelo respondió.
+- Los modelos `gpt-oss` se llaman con `reasoning_effort: "low"` (si no, gastan los tokens razonando y el JSON queda cortado).
+- `llama-3.3-70b-versatile` fue retirado. `openai/gpt-oss-20b` se descartó por falsos positivos en avisos legítimos.
 - Datos: según https://console.groq.com/docs/your-data, por defecto no conserva entradas ni salidas de inferencia (solo metadatos de uso). El compromiso de no entrenar con los datos está en su DPA: **confirmarlo antes de salir a público**.
 
 ### Google Gemini

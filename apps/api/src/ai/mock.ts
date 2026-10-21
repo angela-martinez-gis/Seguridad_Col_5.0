@@ -71,7 +71,7 @@ export class MockProvider implements AiProvider {
       entidadSuplantada: /bancolombia/.test(ev) ? "Bancolombia" : null,
       pasosAdicionales: nivel === "alto" ? ["Guarda capturas del mensaje como evidencia para la denuncia."] : [],
     };
-    return { content: JSON.stringify(respuesta), toolCalls: [] };
+    return { content: JSON.stringify(respuesta), model: this.model, toolCalls: [] };
   }
 
   async transcribe(audio: Buffer, _filename: string, _mime: string, signal: AbortSignal): Promise<Transcripcion> {

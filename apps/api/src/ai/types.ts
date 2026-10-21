@@ -21,6 +21,8 @@ export interface ChatRequest {
 
 export interface ChatResponse {
   content: string | null;
+  /** Modelo que respondió (puede ser uno de respaldo). */
+  model?: string;
   toolCalls: ToolCall[];
 }
 
@@ -32,6 +34,8 @@ export interface Transcripcion {
 export interface AiProvider {
   readonly id: string;
   readonly model: string;
+  /** Modelo principal y de respaldo, en orden. */
+  readonly models?: string[];
   readonly sttModel?: string;
   chat(req: ChatRequest, signal: AbortSignal): Promise<ChatResponse>;
   transcribe?(audio: Buffer, filename: string, mime: string, signal: AbortSignal): Promise<Transcripcion>;

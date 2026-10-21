@@ -20,7 +20,7 @@ jobs:
     env:
       NODE_ENV: test
       AI_PROVIDER: ${{ vars.EVAL_AI_PROVIDER || 'groq' }}
-      AI_MODEL: ${{ vars.EVAL_AI_MODEL || 'qwen/qwen3.8-27b' }}
+      AI_MODEL: ${{ vars.EVAL_AI_MODEL || 'openai/gpt-oss-120b' }}
       AI_API_KEY: ${{ secrets.EVAL_AI_API_KEY }}
       DB_PATH: ":memory:"
       PORT: "8787"

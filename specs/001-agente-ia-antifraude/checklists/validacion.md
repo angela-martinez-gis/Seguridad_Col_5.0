@@ -37,13 +37,20 @@
 | V16 | ✓ | `e2e/offline.spec.ts` (compartir por GET); POST multipart con audio pendiente en Android real |
 | V17 | ✓ | `e2e/offline.spec.ts` |
 | V18 | ✓ | `analisis.test.ts` (petición 21 → 429) |
-| V19 | Parcial | Modo reglas ✓; modo agente con proveedor real pendiente (`eval-ia.yml` + `EVAL_AI_API_KEY`) |
+| V19 | ✓ | Modo agente con Groq real (`gpt-oss-120b` + respaldo `qwen3.8-27b`): IA usada 60/60, detección 100 %, especificidad 95,5 % |
 | V20 | Parcial | `provider-swap.test.ts` ✓; cambio a Groq/Gemini real pendiente de claves |
 | V21 | Pendiente | Requiere configurar secretos, Render y Pages (ver `docs/despliegue.md`) |
 
 ## Latencia (SC-001, SC-012)
 
-No medible sin proveedor real. Ejecutar `npm run smoke:ai -w @itf/api` con Groq configurado (falla si p95 > 15 s) y registrar aquí.
+Medida con Groq real, 60 análisis de texto (2026-10-20): **p50 0,92 s · p95 1,46 s · máx. 1,63 s** (meta p95 ≤ 15 s ✓). SC-012 (audio) pendiente de audio real.
+
+## Hallazgos con el proveedor real
+
+- `llama-3.3-70b-versatile` fue retirado de Groq → se compararon `gpt-oss-120b`, `gpt-oss-20b` y `qwen3.8-27b`.
+- Límite que manda: **200.000 tokens/día por modelo**. Primeras corridas: IA usada solo 16/60 (el agente pedía 4 herramientas por análisis, 6–8 mil tokens).
+- Correcciones: prompt (marcas de privacidad no son riesgo; informar ≠ pedir), herramientas solo para indicadores nuevos, `AI_MAX_TOOL_CALLS=1`, `max_tokens` 500, `reasoning_effort: low` para gpt-oss, cadena `AI_MODELOS_RESPALDO`.
+- Resultado final: ~950 tokens/análisis, IA usada 60/60, sin errores de cuota.
 
 ## Accesibilidad
 

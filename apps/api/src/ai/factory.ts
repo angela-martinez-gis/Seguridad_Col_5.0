@@ -16,6 +16,7 @@ export function createAiProvider(config: Config): AiProvider | null {
         baseURL: config.AI_BASE_URL ?? BASE_URL_POR_PROVEEDOR[config.AI_PROVIDER],
         apiKey: config.AI_API_KEY ?? "",
         model: config.AI_MODEL,
+        fallbackModels: config.AI_MODELOS_RESPALDO,
         sttModel: config.AI_STT_MODEL,
       });
   }

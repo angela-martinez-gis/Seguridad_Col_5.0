@@ -57,3 +57,39 @@ describe("cambio de proveedor solo por configuración (US5, SC-005)", () => {
     expect((await analizar(app, nuevoCliente(), TEXTO)).statusCode).toBe(200);
   });
 });
+
+describe("cadena de modelos de respaldo (cuota diaria por modelo)", () => {
+  const respuesta = (model: string) =>
+    new Response(
+      JSON.stringify({ id: "x", object: "chat.completion", created: 0, model, choices: [{ index: 0, finish_reason: "stop", message: { role: "assistant", content: '{"nivel":"alto","confianza":0.8,"modalidad":"otro","motivos":[]}' } }] }),
+      { status: 200, headers: { "content-type": "application/json" } },
+    );
+  const cuota = () =>
+    new Response(JSON.stringify({ error: { message: "Rate limit reached on tokens per day (TPD). Please try again in 6m50.4s.", type: "tokens", code: "rate_limit_exceeded" } }), {
+      status: 429,
+      headers: { "content-type": "application/json" },
+    });
+
+  it("si el principal agota su cuota responde el de respaldo, y el principal queda en pausa", async () => {
+    const { OpenAiCompatibleProvider, esperaSugeridaMs } = await import("../../src/ai/openaiCompatible");
+    const pedidos: string[] = [];
+    const fetchFalso = (async (_u: string, init: RequestInit) => {
+      const model = JSON.parse(String(init.body)).model as string;
+      pedidos.push(model);
+      return model === "principal" ? cuota() : respuesta(model);
+    }) as unknown as typeof fetch;
+    const p = new OpenAiCompatibleProvider({ id: "groq", baseURL: "http://x/v1", apiKey: "k", model: "principal", fallbackModels: ["respaldo"], fetch: fetchFalso });
+    const r1 = await p.chat({ messages: [{ role: "user", content: "hola" }] }, new AbortController().signal);
+    expect(r1.model).toBe("respaldo");
+    const r2 = await p.chat({ messages: [{ role: "user", content: "hola" }] }, new AbortController().signal);
+    expect(r2.model).toBe("respaldo");
+    expect(pedidos).toEqual(["principal", "respaldo", "respaldo"]);
+    expect(esperaSugeridaMs("Please try again in 6m50.4s")).toBe(410_400);
+  });
+
+  it("si todos agotan su cuota lanza 429 (el análisis sigue con reglas)", async () => {
+    const { OpenAiCompatibleProvider } = await import("../../src/ai/openaiCompatible");
+    const p = new OpenAiCompatibleProvider({ id: "groq", baseURL: "http://x/v1", apiKey: "k", model: "a", fallbackModels: ["b"], fetch: (async () => cuota()) as unknown as typeof fetch });
+    await expect(p.chat({ messages: [{ role: "user", content: "hola" }] }, new AbortController().signal)).rejects.toMatchObject({ status: 429 });
+  });
+});

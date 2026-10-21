@@ -27,7 +27,12 @@ const EnvSchema = z
     AI_PROVIDER: z.enum(PROVEEDORES).default("mock"),
     AI_BASE_URL: vacioComoUndefined,
     AI_API_KEY: vacioComoUndefined,
-    AI_MODEL: z.string().default("qwen/qwen3.8-27b"),
+    AI_MODEL: z.string().default("openai/gpt-oss-120b"),
+    /** Modelos de respaldo separados por coma, usados cuando el anterior agota su cuota (429). */
+    AI_MODELOS_RESPALDO: z
+      .string()
+      .optional()
+      .transform((v) => (v ?? "").split(",").map((s) => s.trim()).filter(Boolean)),
     AI_STT_MODEL: vacioComoUndefined,
     AI_TIMEOUT_MS: z.coerce.number().int().min(1000).default(12000),
     AI_MAX_TOOL_CALLS: z.coerce.number().int().min(0).max(6).default(1),
