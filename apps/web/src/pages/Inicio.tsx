@@ -9,10 +9,6 @@ export default function Inicio() {
           Identifica tu fraude lo revisa antes de que hagas clic, respondas o transfieras. Te dice qué tan riesgoso parece, por qué, qué hacer y dónde
           denunciar.
         </p>
-      </section>
-      <Link className="btn" to="/analizar">
-        Empezar
-      </Link>
       <div className="accesos">
         <Link className="acceso" to="/me-llamaron">
           <span className="icono" aria-hidden="true">📞</span>
@@ -34,6 +30,10 @@ export default function Inicio() {
           <strong>Registro</strong>
           <span>Tus casos y comprobantes.</span>
         </Link>
+      </section>
+      <Link className="btn" to="/analizar">
+        Empezar
+      </Link>
       </div>
       <ul className="tarjeta lista ayuda">
         <li>Sin conexión, el análisis se hace con reglas en tu dispositivo.</li>
