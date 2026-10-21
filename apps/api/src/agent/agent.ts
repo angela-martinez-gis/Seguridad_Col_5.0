@@ -8,6 +8,10 @@ export interface ResultadoAgente {
   assessment: AiAssessment | null;
   fuentesExtra: SourceCheck[];
   error?: string;
+  /** Mensaje técnico del proveedor (sin contenido de la persona), para diagnóstico en logs. */
+  errorDetalle?: string;
+  /** Modelo que produjo la evaluación (principal o de respaldo). */
+  modelo?: string;
   llamadasHerramientas: number;
 }
 
@@ -74,7 +78,7 @@ export async function ejecutarAgente(o: OpcionesAgente): Promise<ResultadoAgente
       }
 
       const parsed = AiAssessment.safeParse(extraerJson(res.content));
-      if (parsed.success) return { assessment: parsed.data, fuentesExtra, llamadasHerramientas: llamadas };
+      if (parsed.success) return { assessment: parsed.data, fuentesExtra, modelo: res.model, llamadasHerramientas: llamadas };
 
       // Último intento: pedir JSON estricto sin herramientas.
       messages.push({ role: "assistant", content: res.content ?? "" });
@@ -82,13 +86,13 @@ export async function ejecutarAgente(o: OpcionesAgente): Promise<ResultadoAgente
       const final = await o.provider.chat({ messages, json: true }, ac.signal);
       const reintento = AiAssessment.safeParse(extraerJson(final.content));
       return reintento.success
-        ? { assessment: reintento.data, fuentesExtra, llamadasHerramientas: llamadas }
+        ? { assessment: reintento.data, fuentesExtra, modelo: final.model, llamadasHerramientas: llamadas }
         : { assessment: null, fuentesExtra, error: "respuesta_invalida", llamadasHerramientas: llamadas };
     }
     return { assessment: null, fuentesExtra, error: "sin_respuesta", llamadasHerramientas: llamadas };
   } catch (e) {
     const error = ac.signal.aborted ? "timeout" : ((e as { status?: number }).status === 429 ? "cuota" : "error_proveedor");
-    return { assessment: null, fuentesExtra, error, llamadasHerramientas: llamadas };
+    return { assessment: null, fuentesExtra, error, errorDetalle: (e as Error).message?.slice(0, 300), llamadasHerramientas: llamadas };
   } finally {
     clearTimeout(timer);
   }

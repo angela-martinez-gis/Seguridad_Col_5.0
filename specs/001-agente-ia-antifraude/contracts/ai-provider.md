@@ -24,7 +24,7 @@ interface AiProvider {
 | `AI_PROVIDER` | `groq` | `gemini` |
 | `AI_BASE_URL` | `https://api.groq.com/openai/v1` | `https://generativelanguage.googleapis.com/v1beta/openai/` |
 | `AI_API_KEY` | secreto | secreto |
-| `AI_MODEL` | `qwen/qwen3.8-27b` | `gemini-2.5-flash` |
+| `AI_MODEL` | `openai/gpt-oss-120b` (+ `AI_MODELOS_RESPALDO=qwen/qwen3.8-27b`) | `gemini-2.5-flash` |
 | `AI_STT_MODEL` | `whisper-large-v3` | *(vacío → transcripción no disponible)* |
 
 Los nombres de modelo se confirman al implementar en la consola del proveedor; cambiar de proveedor no requiere cambios de código (SC-005).

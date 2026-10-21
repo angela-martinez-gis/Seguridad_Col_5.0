@@ -71,9 +71,12 @@ como señal de riesgo.
 EL MODELO DE IA: GRATUITO HOY, INTERCAMBIABLE MAÑANA
 ---------------------------------------------------------------------
 Modelo en uso:
-  - Qwen 3.8 27B (qwen/qwen3.8-27b), un modelo abierto de Alibaba Cloud,
-    ejecutado en el plan gratuito de Groq, para el razonamiento del agente.
-    Responde en 1 a 4 segundos por análisis.
+  - gpt-oss-120b (openai/gpt-oss-120b), un modelo de pesos abiertos
+    publicado por OpenAI, ejecutado en el plan gratuito de Groq, para el
+    razonamiento del agente. Responde en menos de un segundo.
+  - Qwen 3.8 27B (qwen/qwen3.8-27b), modelo abierto de Alibaba Cloud, como
+    respaldo automático: si el primero agota su cuota gratuita del día, el
+    agente sigue trabajando con el segundo, sin que la persona lo note.
   - Whisper large-v3, también en el plan gratuito de Groq, para convertir
     notas de voz en texto.
 
@@ -88,8 +91,8 @@ OpenAI, OpenRouter o a un modelo propio instalado en servidores del
 proyecto se hace solo cambiando la configuración, sin tocar una línea de
 la aplicación. Si mañana aparece un modelo mejor o más barato, el proyecto
 lo adopta en minutos. De hecho ya ocurrió: el modelo previsto inicialmente
-(Llama 3.3 70B) fue retirado por el proveedor, y el reemplazo se evaluó y
-se adoptó cambiando una sola variable.
+(Llama 3.3 70B) fue retirado por el proveedor; los reemplazos se
+compararon con mensajes reales y se adoptaron cambiando la configuración.
 
 
 PENSADO PARA COMUNIDADES DE BAJOS RECURSOS

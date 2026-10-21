@@ -10,6 +10,7 @@ export function registerSistema(app: FastifyInstance, deps: AppDeps) {
     ia: {
       proveedor: deps.ai?.id ?? "none",
       modelo: deps.ai?.model ?? null,
+      modelosRespaldo: deps.ai?.models?.slice(1) ?? [],
       disponible: !!deps.ai,
       transcripcion: !!deps.ai?.transcribe && !!deps.ai?.sttModel,
     },

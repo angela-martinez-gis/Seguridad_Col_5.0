@@ -45,8 +45,8 @@ export function registerAnalisis(app: FastifyInstance, deps: AppDeps) {
       });
       assessment = r.assessment;
       fuentesExtra = r.fuentesExtra;
-      ia = { estado: r.assessment ? "usada" : "no_disponible", proveedor: deps.ai.id, modelo: deps.ai.model };
-      if (r.error) req.log.warn({ errorIa: r.error }, "IA no disponible para este análisis");
+      ia = { estado: r.assessment ? "usada" : "no_disponible", proveedor: deps.ai.id, modelo: r.modelo ?? deps.ai.model };
+      if (r.error) req.log.warn({ errorIa: r.error, detalle: r.errorDetalle, llamadas: r.llamadasHerramientas }, "IA no disponible para este análisis");
     }
     const tIa = performance.now();
 
