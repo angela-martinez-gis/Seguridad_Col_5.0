@@ -29,6 +29,7 @@ export function GuardarCaso({ veredicto, evidencia, consentId }: { veredicto: Ve
   const [permisos] = usePermisos();
   const enLinea = useOnline();
   const [comprobante, setComprobante] = useState<Comprobante | null>(null);
+  const [mostrarExplicacion] = useState(() => !avisoRegistroVisto());
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
 
@@ -46,6 +47,7 @@ export function GuardarCaso({ veredicto, evidencia, consentId }: { veredicto: Ve
         },
       });
       recordarComprobante(c);
+      marcarAvisoRegistroVisto();
       setComprobante(c);
     } catch (e) {
       setError(e instanceof ApiError ? (e.detalle ?? e.titulo) : "No se pudo guardar el caso.");
@@ -60,7 +62,7 @@ export function GuardarCaso({ veredicto, evidencia, consentId }: { veredicto: Ve
       {comprobante ? (
         <>
           <p className="ok" role="status">Caso guardado: {comprobante.caso.id}</p>
-          <p className="ayuda">Se guardó la huella del mensaje y el veredicto, no el mensaje.</p>
+          {mostrarExplicacion && <p className="ayuda">Se guardó la huella del mensaje y el veredicto, no el mensaje.</p>}
           <div className="fila-botones">
             <button type="button" className="btn" onClick={() => descargarComprobante(comprobante)}>
               ⬇️ Descargar comprobante
