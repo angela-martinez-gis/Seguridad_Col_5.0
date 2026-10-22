@@ -71,6 +71,7 @@ fun ConversacionPantalla(
     alForzar: (Categoria?) -> Unit,
     alReportar: () -> Unit,
     alVolver: () -> Unit,
+    textoVolver: String = "Nueva llamada",
 ) {
     var director by remember { mutableStateOf(false) }
     val categoria = estado.veredicto?.categoria
@@ -82,6 +83,9 @@ fun ConversacionPantalla(
             DatosLlamada(estado)
             Chat(estado, Modifier.weight(1f))
             LineaActividad(estado.actividad)
+            estado.aviso?.let {
+                Text(it, color = Colores.ambar, fontSize = 14.sp, modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
+            }
             estado.analisis?.let { PanelSenales(it) }
             if (estado.fase == Fase.CONVERSANDO) Controles(alColgar)
         }
@@ -90,7 +94,7 @@ fun ConversacionPantalla(
             enter = fadeIn() + slideInVertically { it / 3 },
             modifier = Modifier.align(Alignment.BottomCenter),
         ) {
-            Resultado(estado, alReportar, alVolver)
+            Resultado(estado, alReportar, alVolver, textoVolver)
         }
         AnimatedVisibility(visible = director, modifier = Modifier.align(Alignment.TopCenter).padding(top = 56.dp)) {
             PanelDirector(estado.forzado, alForzar, alCerrar = { director = false })
@@ -124,7 +128,7 @@ private fun BarraEstado(estado: EstadoLlamada, color: Color, alMantener: () -> U
 
 @Composable
 private fun DatosLlamada(estado: EstadoLlamada) {
-    val e = estado.escenario ?: return
+    if (estado.numero.isEmpty()) return
     Row(
         Modifier.fillMaxWidth().background(Colores.superficie).padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -132,7 +136,7 @@ private fun DatosLlamada(estado: EstadoLlamada) {
         Icon(Icons.Filled.PhoneInTalk, null, tint = Colores.textoSuave)
         Spacer(Modifier.width(10.dp))
         Column(Modifier.weight(1f)) {
-            Text(e.numero, color = Colores.texto, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+            Text(estado.numero, color = Colores.texto, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
             Text(
                 if (estado.desenlace == Desenlace.TRANSFERIDA) "Transferida a ti" else "Atendida por el asistente",
                 color = Colores.textoSuave,
@@ -265,7 +269,7 @@ private fun ControlInactivo(icono: androidx.compose.ui.graphics.vector.ImageVect
 }
 
 @Composable
-private fun Resultado(estado: EstadoLlamada, alReportar: () -> Unit, alVolver: () -> Unit) {
+private fun Resultado(estado: EstadoLlamada, alReportar: () -> Unit, alVolver: () -> Unit, textoVolver: String) {
     val v = estado.veredicto
     val color = Colores.de(v?.categoria)
     val (titulo, accion) = when (estado.desenlace) {
@@ -275,6 +279,7 @@ private fun Resultado(estado: EstadoLlamada, alReportar: () -> Unit, alVolver: (
         Desenlace.TOMADA_POR_USUARIO -> "Contestaste tú" to "El asistente no intervino en esta llamada."
         Desenlace.RECHAZADA -> "Llamada rechazada" to "Rechazaste la llamada antes de que el asistente contestara."
         Desenlace.CORTADA -> "Llamada finalizada" to "Colgaste antes de que el asistente terminara el análisis."
+        Desenlace.COLGO_EMISOR -> "El emisor colgó" to "Cortó antes de que el asistente terminara de verificarlo. Es común en llamadas de fraude o robots."
         null -> "" to ""
     }
     Column(
@@ -331,7 +336,7 @@ private fun Resultado(estado: EstadoLlamada, alReportar: () -> Unit, alVolver: (
                 onClick = alVolver,
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(containerColor = Colores.azul, contentColor = Color.White),
-            ) { Text("Nueva llamada") }
+            ) { Text(textoVolver) }
         }
     }
 }

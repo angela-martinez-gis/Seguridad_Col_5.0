@@ -13,10 +13,11 @@ import co.seguridad.agentellamadas.datos.Escenario
 import co.seguridad.agentellamadas.datos.Escenarios
 import co.seguridad.agentellamadas.motor.Categoria
 import co.seguridad.agentellamadas.motor.Clasificacion
+import co.seguridad.agentellamadas.motor.Guion
 import co.seguridad.agentellamadas.motor.MotorReglas
-import co.seguridad.agentellamadas.motor.Tipo
 import co.seguridad.agentellamadas.voz.Escucha
 import co.seguridad.agentellamadas.voz.Voz
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -38,13 +39,15 @@ enum class Actividad(val texto: String) {
 }
 
 /** Cómo terminó la llamada, para el panel de resultado. */
-enum class Desenlace { COLGADA_FRAUDE, COLGADA_SPAM, TRANSFERIDA, TOMADA_POR_USUARIO, RECHAZADA, CORTADA }
+enum class Desenlace { COLGADA_FRAUDE, COLGADA_SPAM, TRANSFERIDA, TOMADA_POR_USUARIO, RECHAZADA, CORTADA, COLGO_EMISOR }
 
 data class Mensaje(val deAgente: Boolean, val texto: String)
 
 data class EstadoLlamada(
     val fase: Fase = Fase.INICIO,
     val escenario: Escenario? = null,
+    val numero: String = "",
+    val ubicacion: String = "",
     val enVivo: Boolean = false,
     val cuentaRegresiva: Int = 0,
     val actividad: Actividad = Actividad.NINGUNA,
@@ -56,6 +59,8 @@ data class EstadoLlamada(
     val segundos: Int = 0,
     val forzado: Categoria? = null,
     val reportado: Boolean = false,
+    /** Aviso para el presentador, por ejemplo si no se escuchó al emisor. */
+    val aviso: String? = null,
 )
 
 class LlamadaViewModel(app: Application) : AndroidViewModel(app) {
@@ -63,7 +68,8 @@ class LlamadaViewModel(app: Application) : AndroidViewModel(app) {
     private val voz = Voz(app)
     private val escucha = Escucha(app)
     private val vibrador = app.getSystemService(Vibrator::class.java)
-    private var timbre: Ringtone? = null
+    @Volatile private var timbre: Ringtone? = null
+    private var cargaTimbre: Job? = null
     private var trabajo: Job? = null
     private var cronometro: Job? = null
 
@@ -78,7 +84,7 @@ class LlamadaViewModel(app: Application) : AndroidViewModel(app) {
 
     fun simular(escenario: Escenario, enVivo: Boolean, conRetraso: Boolean) {
         cancelarTodo()
-        _estado.value = EstadoLlamada(escenario = escenario, enVivo = enVivo)
+        _estado.value = EstadoLlamada(escenario = escenario, numero = escenario.numero, ubicacion = escenario.ubicacion, enVivo = enVivo)
         trabajo = viewModelScope.launch {
             if (conRetraso) {
                 for (s in RETRASO_SEGUNDOS downTo 1) {
@@ -150,24 +156,21 @@ class LlamadaViewModel(app: Application) : AndroidViewModel(app) {
 
     private suspend fun conversar() {
         val escenario = _estado.value.escenario ?: return
-        decir(PREGUNTA_1)
+        decir(Guion.PREGUNTA_1)
 
         var r1 = turnoEmisor(escenario.respuesta1)
         if (r1 == null) {
-            decir(REPETIR)
+            decir(Guion.REPETIR)
             r1 = turnoEmisor(escenario.respuesta1)
         }
         val previa = analizar(r1.orEmpty())
-        decir(preguntaDos(previa))
+        decir(Guion.preguntaDos(previa))
 
         val r2 = turnoEmisor(escenario.respuesta2)
-        val final = analizar(listOfNotNull(r1, r2).joinToString(". ")).let {
-            // Sin motivo claro al final, el asistente no deja pasar la llamada.
-            if (it.categoria == Categoria.INDETERMINADO) it.copy(categoria = Categoria.SPAM, tipo = null, confianza = 50) else it
-        }
+        val final = Guion.veredictoFinal(analizar(listOfNotNull(r1, r2).joinToString(". ")))
         _estado.update { it.copy(veredicto = final) }
         alertar(final.categoria)
-        decir(despedida(final.categoria))
+        decir(Guion.despedida(final.categoria))
 
         val desenlace = when (final.categoria) {
             Categoria.FRAUDE -> Desenlace.COLGADA_FRAUDE
@@ -222,28 +225,6 @@ class LlamadaViewModel(app: Application) : AndroidViewModel(app) {
         return resultado
     }
 
-    private fun preguntaDos(c: Clasificacion): String = when (c.categoria) {
-        Categoria.FRAUDE -> when (c.tipo) {
-            Tipo.BANCARIO -> "Por seguridad, ¿me indica su nombre completo, su código de asesor y desde qué sede llama?"
-            Tipo.FAMILIAR -> "Entiendo. ¿Me dice su nombre completo y qué parentesco tiene con ${Escenarios.TITULAR}?"
-            Tipo.PREMIO -> "¿Cuál es el nombre de la empresa y cómo se puede verificar ese sorteo?"
-            Tipo.AUTORIDAD -> "¿Me indica su nombre, su cargo y el número del proceso para verificarlo en los canales oficiales?"
-            Tipo.SOPORTE -> "¿Desde qué área llama y cuál es el número del caso?"
-            else -> "¿De qué entidad llama y cómo puedo verificar su identidad?"
-        }
-        Categoria.SPAM -> when (c.tipo) {
-            Tipo.ROBOT -> "¿Hay una persona en la línea? Por favor, dígame su nombre."
-            else -> "¿Podría eliminar este número de su base de datos comercial?"
-        }
-        Categoria.LEGITIMO -> "¿Es un asunto urgente o prefiere que le deje una nota a ${Escenarios.TITULAR}?"
-        Categoria.INDETERMINADO -> "¿Podría darme más detalles? ¿De parte de quién y de qué se trata?"
-    }
-
-    private fun despedida(categoria: Categoria): String = when (categoria) {
-        Categoria.FRAUDE -> "Esta llamada no puede continuar. Por seguridad, no se entregará ninguna información. Hasta luego."
-        Categoria.LEGITIMO -> "Gracias. Ya le comunico con ${Escenarios.TITULAR}, un momento por favor."
-        else -> "Gracias por llamar. ${Escenarios.TITULAR} no está interesada; por favor retire este número de su lista. Que tenga buen día."
-    }
 
     private fun terminarDuranteTimbre(desenlace: Desenlace) {
         if (_estado.value.fase != Fase.SONANDO) return
@@ -253,13 +234,19 @@ class LlamadaViewModel(app: Application) : AndroidViewModel(app) {
 
     private fun iniciarTimbre() {
         val app = getApplication<Application>()
-        timbre = runCatching {
-            RingtoneManager.getRingtone(app, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE))
-        }.getOrNull()?.also { runCatching { it.play() } }
+        // Preparar el tono es síncrono y puede tardar segundos: fuera del hilo principal (evita ANR).
+        cargaTimbre = viewModelScope.launch(Dispatchers.IO) {
+            val tono = runCatching {
+                RingtoneManager.getRingtone(app, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE))
+            }.getOrNull()
+            timbre = tono
+            if (isActive) runCatching { tono?.play() }
+        }
         vibrador?.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 800, 600), 0))
     }
 
     private fun detenerTimbre() {
+        cargaTimbre?.cancel()
         runCatching { timbre?.stop() }
         timbre = null
         vibrador?.cancel()
@@ -303,8 +290,5 @@ class LlamadaViewModel(app: Application) : AndroidViewModel(app) {
         const val RETRASO_SEGUNDOS = 5
         const val TIMBRE_SEGUNDOS = 4
         private const val MS_POR_PALABRA = 260L
-
-        const val PREGUNTA_1 = "Hola, habla el asistente de seguridad de ${Escenarios.TITULAR}. ¿Cuál es el motivo de su llamada?"
-        const val REPETIR = "Disculpe, no le escuché con claridad. ¿Podría repetir el motivo de su llamada?"
     }
 }

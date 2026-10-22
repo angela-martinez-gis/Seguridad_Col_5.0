@@ -1,6 +1,7 @@
 package co.seguridad.agentellamadas.voz
 
 import android.content.Context
+import android.media.AudioAttributes
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.speech.tts.Voice
@@ -79,6 +80,19 @@ class Voz(context: Context) {
                 cont.resume(Unit)
             }
         }
+    }
+
+    /**
+     * En una llamada real el asistente habla por el altavoz para que el micrófono lo transmita.
+     * `true` usa el volumen de la llamada; `false`, el de asistente (diagnóstico por teléfono).
+     */
+    fun usarCanalDeLlamada(canalDeLlamada: Boolean) {
+        tts.setAudioAttributes(
+            AudioAttributes.Builder()
+                .setUsage(if (canalDeLlamada) AudioAttributes.USAGE_VOICE_COMMUNICATION else AudioAttributes.USAGE_ASSISTANT)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                .build(),
+        )
     }
 
     fun detener() {

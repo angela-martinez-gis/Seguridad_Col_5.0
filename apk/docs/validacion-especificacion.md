@@ -126,3 +126,21 @@ Si B o C fallan en el teléfono de la demo, se pasa a la alternativa de la secci
 2. **Teléfono de la demo**: marca, modelo y versión de Android.
 3. **STT**: local (`SpeechRecognizer`) o Whisper en la nube (Groq).
 4. **Clasificador**: solo reglas ponderadas, o reglas + LLM (Groq) con tiempo límite.
+
+---
+
+## 6. Avance de la prueba técnica (2026-10-22)
+
+Implementada en la app como modo **Llamadas reales (experimental)**, con la arquitectura de la sección 3: `ROLE_DIALER` + `InCallService` + altavoz.
+
+| Prueba | Emulador (Android 14) | Teléfono real |
+|---|---|---|
+| A. Contesta sola una llamada SIM | ✅ `Call.answer`, estado ACTIVE | Pendiente |
+| B. Transcribe la voz del que llama con el altavoz activo | — (el emulador no tiene audio de la otra parte) | **Pendiente: riesgo principal** |
+| C. El que llama escucha el TTS | — | Pendiente |
+| D. Cuelga | ✅ `Call.disconnect`, causa LOCAL | Pendiente |
+| Modo Director en llamada real | ✅ fuerza Fraude y cuelga | Pendiente |
+| Llamada saliente con la pantalla propia | ✅ | Pendiente |
+
+Si B falla en el teléfono de la demo, el asistente muestra *"No se escuchó al emisor"* y el presentador usa el Modo Director.
+

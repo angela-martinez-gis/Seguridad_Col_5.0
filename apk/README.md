@@ -2,7 +2,7 @@
 
 App Android nativa (Kotlin + Jetpack Compose) que **simula** una llamada entrante. Un asistente de voz la contesta, hace dos preguntas y clasifica la llamada como **Fraude**, **Spam** o **Legítima**. Según el resultado, cuelga, se despide o transfiere la llamada.
 
-Es una demo: no intercepta llamadas reales de la SIM. Las razones técnicas y la ruta hacia la versión real están en [docs/validacion-especificacion.md](docs/validacion-especificacion.md). La PWA y la API de la raíz del repositorio no se modifican.
+La simulación no toca las llamadas reales de la SIM; para eso está el modo experimental de [llamadas reales](#llamadas-reales-experimental). Las razones técnicas y la ruta hacia la versión real están en [docs/validacion-especificacion.md](docs/validacion-especificacion.md). La PWA y la API de la raíz del repositorio no se modifican.
 
 ## Qué hace
 
@@ -31,6 +31,19 @@ Es una demo: no intercepta llamadas reales de la SIM. Las razones técnicas y la
 - **Recibir la llamada en 5 s**: da tiempo de preparar la presentación antes de que entre la llamada.
 - **Llamada sorpresa**: elige un escenario al azar.
 - **Modo Director**: mantener presionada la barra de color superior durante la llamada. Permite forzar Fraude, Spam o Legítimo si el micrófono falla. Un punto blanco discreto indica que hay una ruta forzada.
+
+## Llamadas reales (experimental)
+
+Desde el inicio, **Llamadas reales (experimental)**. La app pasa a ser el **teléfono predeterminado**, y el asistente contesta las llamadas SIM entrantes con el mismo flujo: dos preguntas, veredicto y colgar o transferir.
+
+- **Cómo funciona**: a los 4 s de timbre contesta (`InCallService` → `Call.answer`) y activa el altavoz. Su voz sale por el parlante y el micrófono la transmite al que llama; el reconocimiento de voz escucha al emisor por ese mismo altavoz. Con fraude o spam cuelga (`Call.disconnect`). Con una llamada legítima apaga el altavoz, vibra y muestra **Tomar la llamada**.
+- **Mientras sea el teléfono predeterminado**, la app maneja todas las llamadas, también las que haces tú. Para eso tiene una pantalla básica de llamada (altavoz, silencio, teclado y colgar) y un campo para marcar.
+- **Para volver** a la app de Teléfono original: botón *Volver a la app de Teléfono original*, o *Ajustes → Apps → Apps predeterminadas → App de teléfono*.
+- **Riesgo conocido**: algunos teléfonos le entregan silencio al micrófono durante una llamada. En ese caso aparece *"No se escuchó al emisor"* y el asistente termina como spam. En la demo se usa el **Modo Director** para forzar el resultado.
+- **Interruptores**: *El asistente contesta las llamadas entrantes* (si se apaga, suenan normal) y *Voz del asistente por el canal de llamada* (diagnóstico de audio).
+- **Limitaciones**: una llamada a la vez (una segunda entrante se rechaza); no hay historial ni contactos.
+
+Probado en el emulador con `adb emu gsm call <número>`: contesta, activa el altavoz, conversa, cuelga y respeta el Modo Director. Las llamadas salientes también funcionan. **Falta probar en un teléfono real** si el reconocimiento de voz escucha al emisor y si el emisor oye al asistente (puntos B y C de la pantalla de prueba).
 
 ## Instalar
 

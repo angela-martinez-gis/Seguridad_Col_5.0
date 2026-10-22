@@ -51,7 +51,6 @@ fun EntrantePantalla(
     alContestar: () -> Unit,
     alAsistente: () -> Unit,
 ) {
-    val escenario = estado.escenario ?: return
     val pulso = rememberInfiniteTransition(label = "pulso")
     val escala by pulso.animateFloat(1f, 1.18f, infiniteRepeatable(tween(900), RepeatMode.Reverse), label = "escala")
 
@@ -75,8 +74,8 @@ fun EntrantePantalla(
             }
         }
         Spacer(Modifier.height(24.dp))
-        Text(escenario.numero, color = Colores.texto, fontSize = 30.sp, fontWeight = FontWeight.SemiBold)
-        Text(escenario.ubicacion, color = Colores.textoSuave, fontSize = 16.sp)
+        Text(estado.numero, color = Colores.texto, fontSize = 30.sp, fontWeight = FontWeight.SemiBold)
+        Text(estado.ubicacion, color = Colores.textoSuave, fontSize = 16.sp)
         Text("No está en tus contactos", color = Colores.textoSuave, fontSize = 14.sp)
 
         Spacer(Modifier.height(28.dp))

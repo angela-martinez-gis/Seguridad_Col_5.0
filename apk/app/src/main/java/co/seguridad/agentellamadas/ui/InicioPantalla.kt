@@ -20,11 +20,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Casino
+import androidx.compose.material.icons.filled.PhoneInTalk
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -55,6 +57,7 @@ fun InicioPantalla(
     alElegir: (Escenario) -> Unit,
     alAleatoria: () -> Unit,
     alCancelar: () -> Unit,
+    alAbrirReales: () -> Unit,
 ) {
     Box(Modifier.fillMaxSize().background(Colores.fondo).systemBarsPadding()) {
         LazyColumn(
@@ -63,6 +66,13 @@ fun InicioPantalla(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             item { Encabezado() }
+            item {
+                OutlinedButton(onClick = alAbrirReales, modifier = Modifier.fillMaxWidth()) {
+                    Icon(Icons.Filled.PhoneInTalk, null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Llamadas reales (experimental)")
+                }
+            }
             item {
                 Opciones(enVivo, conRetraso, alCambiarModo, alCambiarRetraso, alAleatoria)
             }
