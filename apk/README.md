@@ -34,7 +34,7 @@ Es una demo: no intercepta llamadas reales de la SIM. Las razones técnicas y la
 
 ## Instalar
 
-APK lista: `salida/AgenteAntifraude-0.1.0-poc.apk`, de 1,8 MB y firmada con la llave de depuración.
+APK lista (versionada en el repositorio): `salida/AgenteAntifraude-0.1.0-poc.apk`, de 1,8 MB y firmada con la llave de depuración. Al recompilar, se copia `app/build/outputs/apk/release/app-release.apk` a esa ruta.
 
 1. Pasar la APK al teléfono (Android 10 o superior) y abrirla. Hay que permitir "instalar apps de origen desconocido".
 2. Para que se escuchen las voces, el teléfono debe tener una voz en español en *Ajustes → Sistema → Idioma → Salida de texto a voz*. Si hay dos voces en español instaladas, el emisor usa una distinta a la del asistente.
