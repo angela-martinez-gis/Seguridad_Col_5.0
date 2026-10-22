@@ -53,39 +53,44 @@ function ConsentDialog({ pedido, onResponder }: { pedido: Pedido; onResponder: (
       <div className="dialogo-cuerpo">
         <h2 id="consent-titulo">{esAudio ? "¿Transcribimos tu audio?" : "¿Analizamos con IA y fuentes abiertas?"}</h2>
         <p id="consent-desc" className="aviso" style={{ marginTop: 0 }}>
-          Para este análisis el contenido sale de tu dispositivo. Tú decides cada vez.
-        </p>
-        <dl>
-          <dt>Qué se envía</dt>
-          <dd>
-            {esAudio
-              ? "El audio, solo para convertirlo en texto. No se guarda."
-              : "El texto del mensaje con tus datos personales ocultos (claves, códigos, tarjetas, documentos, correos y parámetros de enlaces)."}
-            {!esAudio && pedido.ocultos > 0 && (
-              <>
-                {" "}
-                <strong>Ocultamos {pedido.ocultos} dato(s) antes de enviarlo.</strong>
-              </>
-            )}
-          </dd>
-          {pedido.vistaPrevia && (
-            <details>
-              <summary className="ayuda">Ver exactamente lo que se envía</summary>
-              <p className="log" style={{ whiteSpace: "pre-wrap" }}>{pedido.vistaPrevia}</p>
-            </details>
+          {esAudio
+            ? "El audio sale de tu dispositivo solo para convertirlo en texto. Tú decides cada vez."
+            : "El texto sale de tu dispositivo con tus datos personales ocultos. Tú decides cada vez."}
+          {!esAudio && pedido.ocultos > 0 && (
+            <>
+              {" "}
+              <strong>Ocultamos {pedido.ocultos} dato(s).</strong>
+            </>
           )}
-          <dt>A quién</dt>
-          <dd>
-            Al servicio Identifica tu fraude y al proveedor de IA <strong>{proveedor.nombre}</strong>. {proveedor.datos}
-            {!esAudio && " Los enlaces se consultan por su dominio en listas públicas de sitios peligrosos; nunca se abren."}
-          </dd>
-          <dt>Para qué</dt>
-          <dd>
-            {esAudio
-              ? "Para que puedas revisar el texto y analizarlo."
-              : "Para estimar el riesgo de fraude y orientarte. El mensaje no se guarda; si luego guardas el caso, solo queda su huella."}
-          </dd>
-        </dl>
+        </p>
+        <details>
+          <summary className="ayuda">Ver detalles: qué se envía, a quién y para qué</summary>
+          <dl>
+            <dt>Qué se envía</dt>
+            <dd>
+              {esAudio
+                ? "El audio, solo para convertirlo en texto. No se guarda."
+                : "El texto del mensaje con tus datos personales ocultos (claves, códigos, tarjetas, documentos, correos y parámetros de enlaces)."}
+            </dd>
+            {pedido.vistaPrevia && (
+              <details>
+                <summary className="ayuda">Ver exactamente lo que se envía</summary>
+                <p className="log" style={{ whiteSpace: "pre-wrap" }}>{pedido.vistaPrevia}</p>
+              </details>
+            )}
+            <dt>A quién</dt>
+            <dd>
+              Al servicio Identifica tu fraude y al proveedor de IA <strong>{proveedor.nombre}</strong>. {proveedor.datos}
+              {!esAudio && " Los enlaces se consultan por su dominio en listas públicas de sitios peligrosos; nunca se abren."}
+            </dd>
+            <dt>Para qué</dt>
+            <dd>
+              {esAudio
+                ? "Para que puedas revisar el texto y analizarlo."
+                : "Para estimar el riesgo de fraude y orientarte. El mensaje no se guarda; si luego guardas el caso, solo queda su huella."}
+            </dd>
+          </dl>
+        </details>
         <div className="fila-botones">
           <button type="button" className="btn secundario" onClick={() => onResponder(false)}>
             Solo en mi dispositivo
