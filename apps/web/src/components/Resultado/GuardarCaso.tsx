@@ -7,6 +7,23 @@ import { api, ApiError } from "../../services/apiClient";
 import { usePermisos } from "../../services/permisos";
 import { descargarComprobante, recordarComprobante } from "../../services/receipts";
 
+/* La explicación de privacidad se muestra solo la primera vez en este dispositivo. */
+const CLAVE_AVISO_REGISTRO = "itf_aviso_registro_visto";
+function avisoRegistroVisto(): boolean {
+  try {
+    return localStorage.getItem(CLAVE_AVISO_REGISTRO) === "1";
+  } catch {
+    return false;
+  }
+}
+function marcarAvisoRegistroVisto() {
+  try {
+    localStorage.setItem(CLAVE_AVISO_REGISTRO, "1");
+  } catch {
+    /* sin almacenamiento disponible: se mostrará otra vez, sin romper nada */
+  }
+}
+
 /* Guardar el caso (FR-014): solo con el permiso activado; la huella se calcula aquí, en el dispositivo. */
 export function GuardarCaso({ veredicto, evidencia, consentId }: { veredicto: Veredicto; evidencia: Evidencia; consentId: string | null }) {
   const [permisos] = usePermisos();
