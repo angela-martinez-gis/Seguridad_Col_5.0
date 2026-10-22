@@ -30,11 +30,11 @@ export default function Inicio() {
           <strong>Registro</strong>
           <span>Tus casos y comprobantes.</span>
         </Link>
-      </section>
+      </div>
       <Link className="btn" to="/analizar">
         Empezar
       </Link>
-      </div>
+      </section>
       <ul className="tarjeta lista ayuda">
         <li>Sin conexión, el análisis se hace con reglas en tu dispositivo.</li>
         <li>Con tu permiso en cada análisis, el contenido (con tus datos personales ocultos) se revisa con IA y fuentes abiertas.</li>
