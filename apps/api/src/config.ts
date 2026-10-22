@@ -43,6 +43,7 @@ const EnvSchema = z
     SOURCE_TIMEOUT_MS: z.coerce.number().int().min(500).default(4000),
     SAFE_BROWSING_API_KEY: vacioComoUndefined,
     URLHAUS_AUTH_KEY: vacioComoUndefined,
+    VIRUSTOTAL_API_KEY: vacioComoUndefined,
 
     CASE_SIGNING_KEY: vacioComoUndefined,
     OWNER_SALT: z.string().default("sal-de-desarrollo"),

@@ -28,6 +28,7 @@ export const ORIGEN: Record<string, { nombre: string; variable: string }> = {
 export const NOMBRE_FUENTE: Record<string, string> = {
   safe_browsing: "Google Safe Browsing",
   urlhaus: "URLhaus (abuse.ch)",
+  virustotal: "VirusTotal",
   rdap: "Registro de dominios (RDAP)",
   entidades: "Catálogo de entidades",
   comunidad: "Reportes de la comunidad",

@@ -16,6 +16,7 @@ import { consultarRdap } from "../sources/rdap";
 import { runSource } from "../sources/runSource";
 import { consultarSafeBrowsing } from "../sources/safeBrowsing";
 import { consultarUrlhaus } from "../sources/urlhaus";
+import { consultarVirusTotal } from "../sources/virustotal";
 
 export interface FuentesDeps {
   config: Config;
@@ -31,6 +32,7 @@ export function revisarUrl(url: string, deps: FuentesDeps): Promise<SourceCheck>
   const tareas = [
     runSource("safe_browsing", host, (s) => consultarSafeBrowsing(url, deps.config.SAFE_BROWSING_API_KEY, s), t),
     runSource("urlhaus", host, (s) => consultarUrlhaus(host, deps.config.URLHAUS_AUTH_KEY, s), t),
+    runSource("virustotal", host, (s) => consultarVirusTotal(host, deps.config.VIRUSTOTAL_API_KEY, s), t),
     runSource("comunidad", host, async () => consultarComunidad(deps.reports, host, "dominio"), t),
   ];
   const local = revisarDominio(host);
