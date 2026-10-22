@@ -59,7 +59,7 @@ export const RelatoLlamada = z.object({
 });
 export type RelatoLlamada = z.infer<typeof RelatoLlamada>;
 
-export const Fuente = z.enum(["safe_browsing", "urlhaus", "rdap", "entidades", "comunidad"]);
+export const Fuente = z.enum(["safe_browsing", "urlhaus", "virustotal", "rdap", "entidades", "comunidad"]);
 export type Fuente = z.infer<typeof Fuente>;
 
 export const SourceCheck = z.object({

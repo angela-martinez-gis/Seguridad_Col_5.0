@@ -13,6 +13,7 @@ import { NIVEL_ORDEN, maxNivel, type AiAssessment, type IaEstado, type Motivo, t
 const NOMBRE_FUENTE: Record<SourceCheck["fuente"], string> = {
   safe_browsing: "Google Safe Browsing",
   urlhaus: "URLhaus (abuse.ch)",
+  virustotal: "VirusTotal",
   rdap: "Registro de dominios (RDAP)",
   entidades: "Catálogo de entidades oficiales",
   comunidad: "Reportes de la comunidad",
@@ -21,6 +22,7 @@ const NOMBRE_FUENTE: Record<SourceCheck["fuente"], string> = {
 const PUNTOS_FUENTE: Record<SourceCheck["fuente"], number> = {
   safe_browsing: 5,
   urlhaus: 5,
+  virustotal: 5,
   rdap: 2,
   entidades: 2,
   comunidad: 3,

@@ -4,6 +4,7 @@ import { consultarRdap, reiniciarBootstrapRdap } from "../../src/sources/rdap";
 import { runSource } from "../../src/sources/runSource";
 import { consultarSafeBrowsing, expresionesUrl } from "../../src/sources/safeBrowsing";
 import { consultarUrlhaus } from "../../src/sources/urlhaus";
+import { consultarVirusTotal } from "../../src/sources/virustotal";
 
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
 const señal = () => new AbortController().signal;
@@ -93,5 +94,29 @@ describe("runSource: las fuentes caídas no detienen el análisis (FR-012)", () 
     );
     const r = await runSource("rdap", "x.com", (s) => consultarRdap("x.com", s), 200);
     expect(r.estado).toBe("timeout");
+  });
+});
+
+describe("VirusTotal (dominio, sin enviar la URL completa)", () => {
+  it("sin clave → no_disponible", async () => {
+    const r = await runSource("virustotal", "x.com", (s) => consultarVirusTotal("x.com", undefined, s));
+    expect(r.estado).toBe("no_disponible");
+  });
+  it("motores que marcan malicioso → coincide, y solo se envía el dominio", async () => {
+    const fetchMock = vi.fn(async (_u: string | URL) => json({ data: { attributes: { last_analysis_stats: { malicious: 3, suspicious: 0, harmless: 60 } } } }));
+    vi.stubGlobal("fetch", fetchMock);
+    const r = await consultarVirusTotal("phish.example.xyz", "k", señal());
+    expect(r.resultado).toBe("coincide");
+    const url = String(fetchMock.mock.calls[0][0]);
+    expect(url).toBe("https://www.virustotal.com/api/v3/domains/phish.example.xyz");
+    expect(url).not.toContain("/login");
+  });
+  it("sospechoso → senal; limpio → limpio; 404 → sin_datos", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => json({ data: { attributes: { last_analysis_stats: { malicious: 0, suspicious: 1 } } } })));
+    expect((await consultarVirusTotal("a.com", "k", señal())).resultado).toBe("senal");
+    vi.stubGlobal("fetch", vi.fn(async () => json({ data: { attributes: { last_analysis_stats: { malicious: 0, suspicious: 0 } } } })));
+    expect((await consultarVirusTotal("a.com", "k", señal())).resultado).toBe("limpio");
+    vi.stubGlobal("fetch", vi.fn(async () => json({ error: { code: "NotFoundError" } }, 404)));
+    expect((await consultarVirusTotal("a.com", "k", señal())).resultado).toBe("sin_datos");
   });
 });

@@ -17,6 +17,7 @@ export function registerSistema(app: FastifyInstance, deps: AppDeps) {
     fuentes: {
       safeBrowsing: !!deps.config.SAFE_BROWSING_API_KEY,
       urlhaus: !!deps.config.URLHAUS_AUTH_KEY,
+      virustotal: !!deps.config.VIRUSTOTAL_API_KEY,
       rdap: true,
       entidades: true,
       comunidad: true,

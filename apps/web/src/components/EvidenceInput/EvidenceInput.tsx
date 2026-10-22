@@ -2,6 +2,7 @@ import type { EvidenciaTipo } from "@itf/core";
 import { extraerEnlaces } from "@itf/core";
 import { useEffect, useState } from "react";
 import { leerCaptura } from "../../services/ocr";
+import { huellaCaptura, leerQr } from "../../services/capturaEvidencia";
 import { EJEMPLO } from "../../textos";
 import { AudioInput } from "./AudioInput";
 import type { AlcanceConsentimiento } from "../ConsentDialog";
@@ -22,6 +23,7 @@ export function EvidenceInput({ onAnalizar, ocupado, textoInicial, audioInicial,
   const [tipo, setTipo] = useState<EvidenciaTipo>("texto");
   const [estadoOcr, setEstadoOcr] = useState<string>("La captura se lee en tu dispositivo: la imagen no se envía.");
   const [leyendo, setLeyendo] = useState(false);
+  const [huella, setHuella] = useState<string | null>(null);
 
   useEffect(() => {
     if (textoInicial) setTexto(textoInicial);
@@ -34,15 +36,22 @@ export function EvidenceInput({ onAnalizar, ocupado, textoInicial, audioInicial,
     e.target.value = "";
     if (!archivo) return;
     setLeyendo(true);
+    setHuella(null);
     setEstadoOcr("Leyendo la captura en tu dispositivo…");
     try {
-      const leido = await leerCaptura(archivo, (p) => setEstadoOcr(`Leyendo la captura en tu dispositivo… ${p}%`));
-      if (!leido) {
-        setEstadoOcr("No encontramos texto en la imagen. Intenta con una captura más nítida o pega el texto.");
+      const [leido, qr, hash] = await Promise.all([
+        leerCaptura(archivo, (p) => setEstadoOcr(`Leyendo la captura en tu dispositivo… ${p}%`)),
+        leerQr(archivo).catch(() => null),
+        huellaCaptura(archivo).catch(() => null),
+      ]);
+      const partes = [leido, qr ? `Código QR de la captura: ${qr}` : ""].filter(Boolean);
+      if (partes.length === 0) {
+        setEstadoOcr("No encontramos texto ni código QR en la imagen. Intenta con una captura más nítida o pega el texto.");
       } else {
-        setTexto(leido);
+        setTexto(partes.join("\n\n"));
         setTipo("captura");
-        setEstadoOcr("Texto extraído. Revísalo y corrígelo si hace falta antes de analizar.");
+        setHuella(hash);
+        setEstadoOcr(qr ? "Texto y código QR extraídos. Revísalos antes de analizar." : "Texto extraído. Revísalo y corrígelo si hace falta antes de analizar.");
       }
     } catch {
       setEstadoOcr("No pudimos leer la captura. Intenta con una imagen más nítida o pega el texto.");
@@ -68,7 +77,10 @@ export function EvidenceInput({ onAnalizar, ocupado, textoInicial, audioInicial,
         value={texto}
         onChange={(e) => {
           setTexto(e.target.value);
-          if (tipo === "captura" && !e.target.value) setTipo("texto");
+          if (tipo === "captura" && !e.target.value) {
+            setTipo("texto");
+            setHuella(null);
+          }
         }}
         placeholder="Ej: Su cuenta será bloqueada hoy. Ingrese aquí para verificar: http://bancolombia-seguro.xyz/login"
         aria-describedby="ayuda-entrada"
@@ -96,6 +108,11 @@ export function EvidenceInput({ onAnalizar, ocupado, textoInicial, audioInicial,
       <p className="ayuda" role="status" aria-live="polite">
         {leyendo && <span className="cargando" aria-hidden="true" />} {estadoOcr}
       </p>
+      {huella && (
+        <p className="ayuda" style={{ margin: "4px 0 0", wordBreak: "break-all" }}>
+          Huella SHA-256 de la captura: <code>{huella}</code>
+        </p>
+      )}
 
       <button className="btn" type="submit" disabled={ocupado || leyendo || !texto.trim()}>
         {ocupado ? <span className="cargando" aria-hidden="true" /> : "🔎"} Analizar
