@@ -133,6 +133,9 @@ class MainActivity : ComponentActivity() {
             enVivo = concedido
             if (!concedido) aviso("Sin micrófono se usa el guion automático")
         }
+        val permisoAcompanar = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { concedido ->
+            if (concedido) llamada.acompanarLlamada() else aviso("Sin micrófono no se puede escuchar la llamada")
+        }
         LaunchedEffect(numeroPorMarcar) { if (numeroPorMarcar != null) enReales = true }
 
         BackHandler(enabled = estado.fase != Fase.INICIO || enReales) {
@@ -166,6 +169,13 @@ class MainActivity : ComponentActivity() {
                 alAleatoria = { llamada.simularAleatoria(enVivo, conRetraso) },
                 alCancelar = llamada::volverAlInicio,
                 alAbrirReales = { enReales = true },
+                alAcompanar = {
+                    when {
+                        !llamada.reconocimientoDisponible -> aviso("Este teléfono no tiene reconocimiento de voz")
+                        tienePermiso(Manifest.permission.RECORD_AUDIO) -> llamada.acompanarLlamada()
+                        else -> permisoAcompanar.launch(Manifest.permission.RECORD_AUDIO)
+                    }
+                },
             )
             estado.fase == Fase.SONANDO -> EntrantePantalla(
                 estado = estado,

@@ -32,6 +32,17 @@ La simulación no toca las llamadas reales de la SIM; para eso está el modo exp
 - **Llamada sorpresa**: elige un escenario al azar.
 - **Modo Director**: mantener presionada la barra de color superior durante la llamada. Permite forzar Fraude, Spam o Legítimo si el micrófono falla. Un punto blanco discreto indica que hay una ruta forzada.
 
+## Llamada real con dos teléfonos (sin cuentas ni servidores)
+
+Botón verde del inicio: **Atender una llamada en altavoz (2 teléfonos)**. Sirve para demostrar la conversación con una llamada real en teléfonos que no dejan al asistente oír ni hablar dentro de la llamada (ver la sección siguiente).
+
+1. **Teléfono A** recibe la llamada real, la contesta y activa el **altavoz**.
+2. **Teléfono B**, con esta app, se pone junto al parlante de A y se toca el botón verde.
+3. B hace las preguntas con su voz: A las capta con su micrófono como si hablara una persona. B escucha las respuestas por el parlante de A y da el veredicto.
+4. El presentador ejecuta la acción en A: colgar si es fraude o spam, o quitar el altavoz si es legítima.
+
+Funciona porque B no está en ninguna llamada, así que Android no le restringe el micrófono ni el parlante. Conviene un lugar sin ruido y el volumen de A al máximo.
+
 ## Llamadas reales (experimental)
 
 Desde el inicio, **Llamadas reales (experimental)**. La app pasa a ser el **teléfono predeterminado**, y el asistente contesta las llamadas SIM entrantes con el mismo flujo: dos preguntas, veredicto y colgar o transferir.

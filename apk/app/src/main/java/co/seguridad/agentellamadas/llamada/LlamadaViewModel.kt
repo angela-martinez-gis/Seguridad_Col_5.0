@@ -61,6 +61,8 @@ data class EstadoLlamada(
     val reportado: Boolean = false,
     /** Aviso para el presentador, por ejemplo si no se escuchó al emisor. */
     val aviso: String? = null,
+    /** Otro teléfono tiene la llamada en altavoz; este solo conversa y da el veredicto. */
+    val acompanante: Boolean = false,
 )
 
 class LlamadaViewModel(app: Application) : AndroidViewModel(app) {
@@ -94,6 +96,23 @@ class LlamadaViewModel(app: Application) : AndroidViewModel(app) {
             }
             sonar()
         }
+    }
+
+    /**
+     * Llamada real en otro teléfono, contestada en altavoz: este teléfono escucha al que llama
+     * por ese parlante y le responde con su propia voz. No está en llamada, así que Android no
+     * le bloquea el micrófono ni el parlante.
+     */
+    fun acompanarLlamada() {
+        cancelarTodo()
+        _estado.value = EstadoLlamada(
+            escenario = ALTAVOZ,
+            numero = "Llamada en altavoz",
+            ubicacion = "Teléfono al lado",
+            enVivo = true,
+            acompanante = true,
+        )
+        trabajo = viewModelScope.launch { atender() }
     }
 
     fun simularAleatoria(enVivo: Boolean, conRetraso: Boolean) =
@@ -290,5 +309,17 @@ class LlamadaViewModel(app: Application) : AndroidViewModel(app) {
         const val RETRASO_SEGUNDOS = 5
         const val TIMBRE_SEGUNDOS = 4
         private const val MS_POR_PALABRA = 260L
+
+        /** En modo acompañante no hay guion: todas las respuestas llegan por el micrófono. */
+        private val ALTAVOZ = Escenario(
+            id = "altavoz",
+            titulo = "Llamada en altavoz",
+            descripcion = "",
+            esperado = Categoria.INDETERMINADO,
+            numero = "Llamada en altavoz",
+            ubicacion = "Teléfono al lado",
+            respuesta1 = "",
+            respuesta2 = "",
+        )
     }
 }

@@ -23,12 +23,24 @@ class Escucha(context: Context) {
 
     val disponible: Boolean get() = SpeechRecognizer.isRecognitionAvailable(contexto)
 
+    /** Por qué falló la última escucha (diagnóstico), o `null` si entendió algo. */
+    var ultimoFallo: String? = null
+        private set
+
     /** Devuelve lo que se entendió, o `null` si hubo silencio, error o pasó el tiempo límite. */
-    suspend fun escuchar(alParcial: (String) -> Unit): String? = withTimeoutOrNull(LIMITE_MS) {
+    suspend fun escuchar(alParcial: (String) -> Unit): String? {
+        ultimoFallo = null
+        val texto = withTimeoutOrNull(LIMITE_MS) { reconocer(alParcial) }
+        if (texto == null && ultimoFallo == null) ultimoFallo = "tiempo agotado sin respuesta del reconocedor"
+        return texto
+    }
+
+    private suspend fun reconocer(alParcial: (String) -> Unit): String? =
         suspendCancellableCoroutine { cont ->
             val reconocedor = SpeechRecognizer.createSpeechRecognizer(contexto)
             fun terminar(texto: String?) {
                 reconocedor.destroy()
+                if (texto.isNullOrBlank() && ultimoFallo == null) ultimoFallo = "no llegó texto"
                 if (cont.isActive) cont.resume(texto?.takeIf { it.isNotBlank() })
             }
             reconocedor.setRecognitionListener(object : RecognitionListener {
@@ -40,7 +52,10 @@ class Escucha(context: Context) {
                         ?.takeIf { it.isNotBlank() }?.let(alParcial)
                 }
 
-                override fun onError(error: Int) = terminar(null)
+                override fun onError(error: Int) {
+                    ultimoFallo = describir(error)
+                    terminar(null)
+                }
                 override fun onReadyForSpeech(params: Bundle?) = Unit
                 override fun onBeginningOfSpeech() = Unit
                 override fun onRmsChanged(rms: Float) = Unit
@@ -57,6 +72,16 @@ class Escucha(context: Context) {
                     .putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 1500L),
             )
         }
+
+    private fun describir(error: Int): String = when (error) {
+        SpeechRecognizer.ERROR_AUDIO -> "el sistema no entregó audio del micrófono"
+        SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "solo llegó silencio"
+        SpeechRecognizer.ERROR_NO_MATCH -> "llegó sonido pero no se reconocieron palabras"
+        SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "falta el permiso de micrófono"
+        SpeechRecognizer.ERROR_NETWORK, SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "sin internet para el reconocedor"
+        SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "reconocedor ocupado"
+        SpeechRecognizer.ERROR_CLIENT -> "error del cliente de reconocimiento"
+        else -> "error del reconocedor ($error)"
     }
 
     private companion object {

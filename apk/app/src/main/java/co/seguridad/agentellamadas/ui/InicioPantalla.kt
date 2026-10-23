@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Casino
 import androidx.compose.material.icons.filled.PhoneInTalk
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ButtonDefaults
@@ -58,6 +59,7 @@ fun InicioPantalla(
     alAleatoria: () -> Unit,
     alCancelar: () -> Unit,
     alAbrirReales: () -> Unit,
+    alAcompanar: () -> Unit,
 ) {
     Box(Modifier.fillMaxSize().background(Colores.fondo).systemBarsPadding()) {
         LazyColumn(
@@ -71,6 +73,17 @@ fun InicioPantalla(
                     Icon(Icons.Filled.PhoneInTalk, null)
                     Spacer(Modifier.width(8.dp))
                     Text("Llamadas reales (experimental)")
+                }
+            }
+            item {
+                Button(
+                    onClick = alAcompanar,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Colores.verde, contentColor = Color.White),
+                ) {
+                    Icon(Icons.Filled.SupportAgent, null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Atender una llamada en altavoz (2 teléfonos)")
                 }
             }
             item {

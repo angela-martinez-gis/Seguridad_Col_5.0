@@ -281,6 +281,13 @@ private fun Resultado(estado: EstadoLlamada, alReportar: () -> Unit, alVolver: (
         Desenlace.CORTADA -> "Llamada finalizada" to "Colgaste antes de que el asistente terminara el análisis."
         Desenlace.COLGO_EMISOR -> "El emisor colgó" to "Cortó antes de que el asistente terminara de verificarlo. Es común en llamadas de fraude o robots."
         null -> "" to ""
+    }.let { (t, a) ->
+        // Acompañante: la llamada vive en el otro teléfono; el presentador ejecuta la acción.
+        if (!estado.acompanante) t to a else t to when (estado.desenlace) {
+            Desenlace.COLGADA_FRAUDE, Desenlace.COLGADA_SPAM -> "Cuelga la llamada en el teléfono que está en altavoz."
+            Desenlace.TRANSFERIDA -> "Es segura: quita el altavoz y continúa la llamada."
+            else -> a
+        }
     }
     Column(
         Modifier

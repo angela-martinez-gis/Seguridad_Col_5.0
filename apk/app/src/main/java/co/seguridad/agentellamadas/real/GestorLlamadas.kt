@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
+import android.util.Log
 import android.os.Vibrator
 import android.telecom.Call
 import android.telecom.CallAudioState
@@ -61,6 +62,7 @@ data class EstadoReal(
 object GestorLlamadas {
 
     private const val TIMBRE_SEGUNDOS = 4
+    private const val ETIQUETA = "AgenteLlamadas"
 
     var servicio: ServicioLlamadas? = null
 
@@ -73,6 +75,9 @@ object GestorLlamadas {
     private var cronometro: Job? = null
     private var voz: Voz? = null
     private var escucha: Escucha? = null
+
+    /** Resultado de [SondaMicrofono] en la llamada actual (se mide una sola vez). */
+    private var diagnostico: String? = null
 
     private val alCambiar = object : Call.Callback() {
         override fun onStateChanged(call: Call, estado: Int) = estadoCambiado(estado)
@@ -88,6 +93,7 @@ object GestorLlamadas {
             return
         }
         llamada = call
+        diagnostico = null
         call.registerCallback(alCambiar)
         val numero = call.details.handle?.schemeSpecificPart?.takeIf { it.isNotBlank() } ?: "Número privado"
         val conAsistente = entrante && Ajustes(context).asistenteActivo
@@ -280,8 +286,23 @@ object GestorLlamadas {
             it.copy(
                 subtitulo = null,
                 mensajes = if (texto != null) it.mensajes + Mensaje(false, texto) else it.mensajes,
-                aviso = if (texto == null) "No se escuchó al emisor. Si se repite, usa el Modo Director." else null,
+                aviso = if (texto == null) {
+                    "No se escuchó al emisor: ${escucha?.ultimoFallo}." +
+                        (diagnostico?.let { d -> "\nNivel del micrófono en llamada: $d" } ?: " Si se repite, usa el Modo Director.")
+                } else {
+                    null
+                },
             )
+        }
+        if (texto == null && diagnostico == null) {
+            // Una vez por llamada: ¿llega sonido a la app? Mientras mide, el emisor debe seguir hablando.
+            actualizarAsistente { it.copy(actividad = Actividad.ANALIZANDO, aviso = "Midiendo el micrófono… (que el emisor siga hablando)") }
+            val resumen = SondaMicrofono.resumen(SondaMicrofono.medir())
+            diagnostico = resumen
+            Log.i(ETIQUETA, "Fallo de escucha: ${escucha?.ultimoFallo} · niveles: $resumen")
+            actualizarAsistente {
+                it.copy(aviso = "No se escuchó al emisor: ${escucha?.ultimoFallo}.\nNivel del micrófono en llamada: $resumen")
+            }
         }
         return texto
     }
